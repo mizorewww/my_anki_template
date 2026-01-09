@@ -65,14 +65,23 @@
 
 ### 配置步骤
 1. 克隆或下载本仓库。
-2. 运行同步脚本:
+2. **下载资源文件** (运行提供的 Shell 脚本):
+   ```bash
+   # 1. 下载字体 (LXGW WenKai, Maple Mono)
+   bash sync_font.sh
+   
+   # 2. 下载 JS/CSS 依赖库 (Marked, KaTeX, Highlight.js)
+   bash sync_libs.sh
+   ```
+   *(Windows 用户请使用 Git Bash 或 WSL 运行上述命令)*
+
+3. **同步到 Anki**:
    ```bash
    python3 anki_connect.py
    ```
    脚本将自动完成以下操作:
-   - ✅ 下载所需字体 (霞鹜文楷, Maple Mono)。
-   - ✅ 下载 JS/CSS 依赖库 (Marked, KaTeX, Highlight.js)。
-   - ✅ 在 Anki 中创建/更新上述 4 种笔记类型。
+   - ✅ 将下载的字体和库文件同步到 Anki 媒体文件夹。
+   - ✅ 在 Anki 中创建/更新 4 种笔记类型。
    - ✅ 在 "Default" 牌组中创建示例卡片。
 
 ## ✍️ 书写示例

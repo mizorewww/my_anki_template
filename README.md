@@ -65,13 +65,22 @@ Running the sync script will automatically create these 4 note types in Anki:
 
 ### Setup
 1. Clone or download this repository.
-2. Run the sync script:
+2. **Download Resources** (Run the provided Shell scripts):
+   ```bash
+   # 1. Download Fonts (LXGW WenKai, Maple Mono)
+   bash sync_font.sh
+   
+   # 2. Download JS/CSS Libraries (Marked, KaTeX, Highlight.js)
+   bash sync_libs.sh
+   ```
+   *(Windows users please use Git Bash or WSL)*
+
+3. **Sync to Anki**:
    ```bash
    python3 anki_connect.py
    ```
    This script will:
-   - ✅ Download necessary fonts (LXGW WenKai, Maple Mono).
-   - ✅ Download JS/CSS libraries (Marked, KaTeX, Highlight.js).
+   - ✅ Sync downloaded fonts and libraries to Anki media folder.
    - ✅ Create/Update the 4 Note Types in Anki.
    - ✅ Create Example Cards in the "Default" deck.
 
