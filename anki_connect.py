@@ -161,70 +161,96 @@ def sync_all_media(force: bool = False):
 
 
 # ======================= 笔记类型管理 =======================
-def read_template_file(filename: str) -> str:
+def read_template_file(path_str: str) -> str:
     """读取模板文件"""
-    filepath = TEMPLATE_DIR / filename
+    filepath = SCRIPT_DIR / "templates" / path_str
     if not filepath.exists():
         raise FileNotFoundError(f"模板文件不存在: {filepath}")
     return filepath.read_text(encoding="utf-8")
 
 
-def get_model_config():
-    """获取笔记类型配置"""
-    front_template = read_template_file("front.html")
-    back_template = read_template_file("back.html")
-    css = read_template_file("style.css")
-    
-    return {
-        "modelName": MODEL_NAME,
-        "inOrderFields": ["Text", "Extra"],
-        "css": css,
-        "isCloze": True,
-        "cardTemplates": [
-            {
-                "Name": "Cloze",
-                "Front": front_template,
-                "Back": back_template,
-            }
-        ]
+MODELS = [
+    {
+        "name": "Cloze-Modern",
+        "type": "cloze",
+        "fields": ["Text", "Extra"],
+        "templates": [{"name": "Cloze", "front": "cloze/front.html", "back": "cloze/back.html"}],
+        "css": "cloze/style.css"
+    },
+    {
+        "name": "Cloze-Modern-Typing",
+        "type": "cloze",
+        "fields": ["Text", "Extra"],
+        "templates": [{"name": "Cloze Typing", "front": "cloze-type/front.html", "back": "cloze-type/back.html"}],
+        "css": "cloze/style.css"
+    },
+    {
+        "name": "Basic-Modern",
+        "type": "basic",  # basic (isCloze=False)
+        "fields": ["Front", "Back"],
+        "templates": [{"name": "Card 1", "front": "basic/front.html", "back": "basic/back.html"}],
+        "css": "cloze/style.css"
+    },
+    {
+        "name": "Basic-Modern-Typing",
+        "type": "basic",
+        "fields": ["Front", "Back"],
+        "templates": [{"name": "Card 1", "front": "basic-type/front.html", "back": "basic-type/back.html"}],
+        "css": "cloze/style.css"
     }
+]
 
 
-def create_or_update_model():
-    """创建或更新笔记类型"""
-    print(f"\n📝 配置笔记类型: {MODEL_NAME}")
-    
+def create_or_update_models():
+    """创建或更新所有笔记类型"""
     existing_models = invoke("modelNames")
-    model_config = get_model_config()
     
-    if MODEL_NAME in existing_models:
-        # 更新现有模型
-        print("  更新现有笔记类型...")
+    for model in MODELS:
+        print(f"\n📝 配置笔记类型: {model['name']}")
         
-        # 更新 CSS
-        invoke("updateModelStyling", model={
-            "name": MODEL_NAME,
-            "css": model_config["css"]
-        })
-        print("    ✓ 样式已更新")
+        css = read_template_file(model["css"])
+        is_cloze = (model["type"] == "cloze")
         
-        # 更新模板
-        invoke("updateModelTemplates", model={
-            "name": MODEL_NAME,
-            "templates": {
-                "Cloze": {
-                    "Front": model_config["cardTemplates"][0]["Front"],
-                    "Back": model_config["cardTemplates"][0]["Back"],
-                }
-            }
-        })
-        print("    ✓ 模板已更新")
-        
-    else:
-        # 创建新模型
-        print("  创建新笔记类型...")
-        invoke("createModel", **model_config)
-        print(f"    ✓ 笔记类型 '{MODEL_NAME}' 已创建")
+        # 准备模板数据
+        card_templates = []
+        for tmpl in model["templates"]:
+            card_templates.append({
+                "Name": tmpl["name"],
+                "Front": read_template_file(tmpl["front"]),
+                "Back": read_template_file(tmpl["back"])
+            })
+
+        if model["name"] in existing_models:
+            print(f"  更新现有笔记类型 ({model['name']})...")
+            
+            # 更新 CSS
+            invoke("updateModelStyling", model={
+                "name": model["name"],
+                "css": css
+            })
+            print("    ✓ 样式已更新")
+            
+            # 更新模板 (遍历每个模板)
+            tmpl_map = {}
+            for ct in card_templates:
+                tmpl_map[ct["Name"]] = {"Front": ct["Front"], "Back": ct["Back"]}
+            
+            invoke("updateModelTemplates", model={
+                "name": model["name"],
+                "templates": tmpl_map
+            })
+            print("    ✓ 模板已更新")
+            
+        else:
+            print(f"  创建新笔记类型 ({model['name']})...")
+            invoke("createModel", 
+                   modelName=model["name"],
+                   inOrderFields=model["fields"],
+                   css=css,
+                   isCloze=is_cloze,
+                   cardTemplates=card_templates
+            )
+            print(f"    ✓ 笔记类型 '{model['name']}' 已创建")
     
     return True
 
@@ -233,65 +259,61 @@ def create_or_update_model():
 EXAMPLE_CARDS = [
     {
         "deckName": "Default",
-        "modelName": MODEL_NAME,
+        "modelName": "Cloze-Modern",
         "fields": {
             "Text": """## 拉格朗日中值定理
-
 **定理内容**：如果函数 $f(x)$ 满足：
-
 1. 在闭区间 $[a, b]$ 上{{c1::连续}}
 2. 在开区间 $(a, b)$ 内{{c2::可导}}
 
 则至少存在一点 $\\xi \\in (a, b)$，使得：
-
 $${{c3::f'(\\xi) = \\frac{f(b) - f(a)}{b - a}}}$$
 
 > 💡 **几何意义**：曲线上至少存在一点，该点的{{c4::切线斜率}}等于两端点连线的斜率。
 """,
-            "Extra": "拉格朗日中值定理是微分学的基本定理之一，是罗尔定理的推广。"
+            "Extra": "这是 **Cloze-Modern** 模板的示例。"
         },
-        "tags": ["数学", "微积分", "中值定理"]
+        "tags": ["example", "cloze-modern"]
     },
     {
         "deckName": "Default",
-        "modelName": MODEL_NAME,
+        "modelName": "Cloze-Modern-Typing",
         "fields": {
-            "Text": """## Python 装饰器
-
-装饰器是一种{{c1::高阶函数}}，用于在不修改原函数代码的情况下扩展功能。
-
-### 基本语法
+            "Text": """## 单词拼写
+Please type the meaning of "apple":
+{{c1::apple}}
+""",
+            "Extra": "这是 **Cloze-Modern-Typing** 模板的示例。"
+        },
+        "tags": ["example", "cloze-typing"]
+    },
+    {
+        "deckName": "Default",
+        "modelName": "Basic-Modern",
+        "fields": {
+            "Front": """## 简答题
+请简述 **Python** 中 `list` 和 `tuple` 的区别。
+""",
+            "Back": """1. **可变性**：`list` 是**可变的**，`tuple` 是**不可变的**。
+2. **语法**：`list` 使用 `[]`，`tuple` 使用 `()`。
+3. **性能**：`tuple` 通常比 `list` 略快，占用内存更少。
 
 ```python
-def {{c2::my_decorator}}(func):
-    def wrapper(*args, **kwargs):
-        print("函数调用前")
-        result = {{c3::func(*args, **kwargs)}}
-        print("函数调用后")
-        return result
-    return wrapper
-
-@my_decorator
-def say_hello(name):
-    print(f"Hello, {name}!")
-
-# 调用
-say_hello("World")
+x = [1, 2] # List
+y = (1, 2) # Tuple
 ```
-
-### 输出结果
-
-```
-函数调用前
-Hello, World!
-函数调用后
-```
-
-> 📌 `@decorator` 语法糖等价于 `func = decorator(func)`
-""",
-            "Extra": "装饰器是 Python 中实现 AOP (面向切面编程) 的常用方式。"
+"""
         },
-        "tags": ["编程", "Python", "装饰器"]
+        "tags": ["example", "basic-modern"]
+    },
+    {
+        "deckName": "Default",
+        "modelName": "Basic-Modern-Typing",
+        "fields": {
+            "Front": "What comes after 'A'?",
+            "Back": "B"
+        },
+        "tags": ["example", "basic-typing"]
     }
 ]
 
@@ -299,40 +321,40 @@ Hello, World!
 def create_example_cards():
     """创建示例卡片"""
     print("\n🃏 创建示例卡片...")
+    created_count = 0
     
-    created = 0
-    for i, card in enumerate(EXAMPLE_CARDS, 1):
+    for i, note in enumerate(EXAMPLE_CARDS):
         try:
             # 检查牌组是否存在
             decks = invoke("deckNames")
-            if card["deckName"] not in decks:
-                invoke("createDeck", deck=card["deckName"])
-            
+            if note["deckName"] not in decks:
+                invoke("createDeck", deck=note["deckName"])
+
             # 创建笔记
             note_id = invoke("addNote", note={
-                "deckName": card["deckName"],
-                "modelName": card["modelName"],
-                "fields": card["fields"],
-                "tags": card.get("tags", []),
+                "deckName": note["deckName"],
+                "modelName": note["modelName"],
+                "fields": note["fields"],
+                "tags": note.get("tags", []),
                 "options": {
                     "allowDuplicate": False
                 }
             })
             
             if note_id:
-                print(f"  ✓ 示例卡片 {i} 已创建 (ID: {note_id})")
-                created += 1
+                print(f"  ✓ 示例卡片 {i+1} 已创建 ({note['modelName']})")
+                created_count += 1
             else:
-                print(f"  ⚠ 示例卡片 {i} 可能已存在")
+                print(f"  ⚠ 示例卡片 {i+1} 可能已存在")
                 
         except Exception as e:
             if "duplicate" in str(e).lower():
-                print(f"  ⚠ 示例卡片 {i} 已存在，跳过")
+                print(f"  ⚠ 示例卡片 {i+1} 已存在，跳过")
             else:
-                print(f"  ✗ 示例卡片 {i} 创建失败: {e}")
-    
-    print(f"\n  共创建 {created} 张卡片")
-    return created
+                print(f"  ✗ 创建失败: {e}")
+
+    print(f"\n  共创建 {created_count} 张卡片")
+    return created_count
 
 
 # ======================= 主程序 =======================
@@ -343,33 +365,22 @@ def main():
     
     # 1. 检查连接
     if not check_connection():
-        return 1
+        return
     
-    # 2. 同步媒体文件
-    try:
-        sync_all_media()
-    except Exception as e:
-        print(f"✗ 媒体同步失败: {e}")
-        return 1
+    # 1. 同步媒体文件
+    print("\n📦 同步媒体文件...")
+    sync_all_media()
     
-    # 3. 创建/更新笔记类型
-    try:
-        create_or_update_model()
-    except Exception as e:
-        print(f"✗ 笔记类型配置失败: {e}")
-        return 1
+    # 2. 配置笔记类型
+    create_or_update_models()
     
-    # 4. 创建示例卡片
-    try:
-        create_example_cards()
-    except Exception as e:
-        print(f"✗ 示例卡片创建失败: {e}")
-        return 1
+    # 3. 创建示例卡片
+    create_example_cards()
     
     print("\n" + "=" * 50)
     print("     ✓ 同步完成！")
     print("=" * 50)
-    print(f"\n请在 Anki 中查看笔记类型 '{MODEL_NAME}' 和示例卡片。")
+    print("\n请在 Anki 中查看笔记类型和示例卡片。")
     
     return 0
 

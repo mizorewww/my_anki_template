@@ -1,0 +1,23 @@
+<!-- Cloze Modern Typing - Back -->
+<link rel="stylesheet" href="_katex.min.css">
+<link id="hljs-light" rel="stylesheet" href="_github.min.css" media="(prefers-color-scheme: light)">
+<link id="hljs-dark" rel="stylesheet" href="_github-dark.min.css" media="(prefers-color-scheme: dark)">
+
+<div class="content-wrapper">
+    <div id="rendered-content"></div>
+    <hr class="separator">
+    <div class="input-area">
+        {{type:cloze:Text}}
+    </div>
+</div>
+
+<div id="raw-content" style="display:none;">{{cloze:Text}}</div>
+
+<script src="_marked.min.js"></script>
+<script src="_katex.min.js"></script>
+<script src="_highlight.min.js"></script>
+<script src="_renderer.js"></script>
+
+<script>
+    renderCloze('raw-content', 'rendered-content', 'back');
+</script>

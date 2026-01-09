@@ -1,0 +1,22 @@
+<!-- Basic Modern Typing - Front -->
+<link rel="stylesheet" href="_katex.min.css">
+<link id="hljs-light" rel="stylesheet" href="_github.min.css" media="(prefers-color-scheme: light)">
+<link id="hljs-dark" rel="stylesheet" href="_github-dark.min.css" media="(prefers-color-scheme: dark)">
+
+<div class="content-wrapper">
+    <div id="rendered-front"></div>
+    <div class="input-area">
+        {{type:Back}}
+    </div>
+</div>
+
+<div id="raw-front" style="display:none;">{{Front}}</div>
+
+<script src="_marked.min.js"></script>
+<script src="_katex.min.js"></script>
+<script src="_highlight.min.js"></script>
+<script src="_renderer.js"></script>
+
+<script>
+    renderCloze('raw-front', 'rendered-front', 'front');
+</script>

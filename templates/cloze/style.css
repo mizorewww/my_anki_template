@@ -272,10 +272,84 @@ html {
     margin: 0.5em 0;
 }
 
-/* 水平线 */
+/* ================== 输入框与对比样式 ================== */
+.input-area {
+    margin-top: 1.5em;
+    text-align: center;
+}
+
+/* Anki 输入框 */
+#typeans {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+input#typeans {
+    font-family: 'LXGW WenKai', sans-serif;
+    font-size: 1.2rem;
+    padding: 0.5em;
+    width: 100%;
+    box-sizing: border-box;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+input#typeans:focus {
+    border-color: var(--accent-color);
+}
+
+/* Diff 显示 - 覆盖 Anki 默认样式 */
+code#typeans {
+    font-family: 'LXGW WenKai', sans-serif;
+    padding: 1em;
+    display: block;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    text-align: left;
+    margin-top: 1em;
+    line-height: 1.6;
+}
+
+.typeGood {
+    background: rgba(46, 160, 67, 0.2);
+    color: inherit;
+    padding: 1px 4px;
+    border-radius: 4px;
+}
+
+.typeBad {
+    background: rgba(218, 54, 51, 0.2);
+    color: inherit;
+    padding: 1px 4px;
+    border-radius: 4px;
+}
+
+.typeMissed {
+    background: rgba(110, 118, 129, 0.2);
+    color: var(--text-muted);
+    padding: 1px 4px;
+    border-radius: 4px;
+    text-decoration: line-through;
+}
+
+/* 分隔符 */
+hr.separator {
+    margin: 2em 0;
+    border: 0;
+    height: 1px;
+    background: var(--border-color);
+}
+
+/* 水平线 (Markdown hr) */
 #rendered-content hr {
     border: none;
     height: 1px;
+
     background: var(--border-color);
     margin: 2em 0;
 }
