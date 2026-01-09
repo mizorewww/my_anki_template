@@ -1,0 +1,104 @@
+<!-- Anki Cloze Modern Template - Front Side -->
+<div class="content-wrapper">
+    <div id="rendered-content"></div>
+</div>
+
+<!-- KaTeX CSS (内嵌) -->
+<link rel="stylesheet" href="_katex.min.css">
+
+<!-- Highlight.js CSS (根据主题自动选择) -->
+<link id="hljs-light" rel="stylesheet" href="_github.min.css" media="(prefers-color-scheme: light)">
+<link id="hljs-dark" rel="stylesheet" href="_github-dark.min.css" media="(prefers-color-scheme: dark)">
+
+<script src="_marked.min.js"></script>
+<script src="_katex.min.js"></script>
+<script src="_highlight.min.js"></script>
+
+<script>
+(function() {
+    // =====================================================
+    // 五阶段令牌化渲染器 - 解决 Anki 标签与 Markdown/LaTeX 冲突
+    // =====================================================
+    
+    const rawContent = `{{cloze:Text}}`;
+    
+    // 阶段1: 保护 Anki 填空标签
+    const clozeTokens = [];
+    let tokenized = rawContent.replace(/<span class="cloze[^"]*"[^>]*>[\s\S]*?<\/span>/gi, function(match) {
+        const token = `%%CLOZE_${clozeTokens.length}%%`;
+        clozeTokens.push(match);
+        return token;
+    });
+    
+    // 阶段2: 保护 LaTeX 公式 ($$...$$ 和 $...$)
+    const latexTokens = [];
+    // 块级公式 $$...$$
+    tokenized = tokenized.replace(/\$\$([\s\S]*?)\$\$/g, function(match, formula) {
+        const token = `%%LATEX_BLOCK_${latexTokens.length}%%`;
+        latexTokens.push({ type: 'block', formula: formula });
+        return token;
+    });
+    // 行内公式 $...$
+    tokenized = tokenized.replace(/\$([^\$\n]+?)\$/g, function(match, formula) {
+        const token = `%%LATEX_INLINE_${latexTokens.length}%%`;
+        latexTokens.push({ type: 'inline', formula: formula });
+        return token;
+    });
+    
+    // 阶段3: Markdown 渲染
+    marked.setOptions({
+        breaks: true,
+        gfm: true,
+        highlight: function(code, lang) {
+            if (lang && hljs.getLanguage(lang)) {
+                try {
+                    return hljs.highlight(code, { language: lang }).value;
+                } catch (e) {}
+            }
+            return hljs.highlightAuto(code).value;
+        }
+    });
+    
+    let rendered = marked.parse(tokenized);
+    
+    // 阶段4: 还原 LaTeX 并渲染
+    rendered = rendered.replace(/%%LATEX_BLOCK_(\d+)%%/g, function(match, index) {
+        const item = latexTokens[parseInt(index)];
+        try {
+            return katex.renderToString(item.formula, {
+                displayMode: true,
+                throwOnError: false,
+                output: 'html'
+            });
+        } catch (e) {
+            return `<span class="katex-error">${item.formula}</span>`;
+        }
+    });
+    
+    rendered = rendered.replace(/%%LATEX_INLINE_(\d+)%%/g, function(match, index) {
+        const item = latexTokens[parseInt(index)];
+        try {
+            return katex.renderToString(item.formula, {
+                displayMode: false,
+                throwOnError: false,
+                output: 'html'
+            });
+        } catch (e) {
+            return `<span class="katex-error">${item.formula}</span>`;
+        }
+    });
+    
+    // 阶段5: 还原 Anki 填空标签
+    rendered = rendered.replace(/%%CLOZE_(\d+)%%/g, function(match, index) {
+        return clozeTokens[parseInt(index)];
+    });
+    
+    // 渲染到页面
+    document.getElementById('rendered-content').innerHTML = rendered;
+    
+    // 对未处理的代码块进行高亮
+    document.querySelectorAll('pre code:not(.hljs)').forEach(function(block) {
+        hljs.highlightElement(block);
+    });
+})();
+</script>

@@ -1,0 +1,394 @@
+/* =====================================================
+   Anki Cloze Modern Template - Style Sheet
+   Version: 1.0
+   ===================================================== */
+
+/* ================== 字体定义 ================== */
+@font-face {
+    font-family: 'LXGW WenKai';
+    src: url('_LXGWWenKai-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'LXGW WenKai';
+    src: url('_LXGWWenKai-Medium.ttf') format('truetype');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'LXGW WenKai';
+    src: url('_LXGWWenKai-Light.ttf') format('truetype');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Maple Mono';
+    src: url('_MapleMono-NF-CN-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Maple Mono';
+    src: url('_MapleMono-NF-CN-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Maple Mono';
+    src: url('_MapleMono-NF-CN-Italic.ttf') format('truetype');
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+}
+
+/* ================== CSS 变量 (主题) ================== */
+:root {
+    /* 浅色主题 */
+    --bg-primary: #fafafa;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #f5f5f5;
+    --text-primary: #1a1a2e;
+    --text-secondary: #4a4a6a;
+    --text-muted: #7a7a9a;
+    --accent-color: #6366f1;
+    --accent-light: #818cf8;
+    --border-color: rgba(0, 0, 0, 0.08);
+    --shadow-color: rgba(0, 0, 0, 0.06);
+    --cloze-color: #2563eb;
+    --cloze-bg: rgba(37, 99, 235, 0.1);
+    --code-bg: #f8f9fc;
+    --code-border: #e2e8f0;
+    --inline-code-bg: rgba(99, 102, 241, 0.08);
+    --blockquote-border: #6366f1;
+    --blockquote-bg: rgba(99, 102, 241, 0.05);
+}
+
+/* 深色主题 */
+.nightMode, .night_mode, [data-theme="dark"] {
+    --bg-primary: #0f0f1a;
+    --bg-secondary: #1a1a2e;
+    --bg-tertiary: #252540;
+    --text-primary: #e8e8f0;
+    --text-secondary: #b8b8d0;
+    --text-muted: #8888a8;
+    --accent-color: #818cf8;
+    --accent-light: #a5b4fc;
+    --border-color: rgba(255, 255, 255, 0.08);
+    --shadow-color: rgba(0, 0, 0, 0.3);
+    --cloze-color: #60a5fa;
+    --cloze-bg: rgba(96, 165, 250, 0.15);
+    --code-bg: #1e1e30;
+    --code-border: #2d2d4a;
+    --inline-code-bg: rgba(129, 140, 248, 0.15);
+    --blockquote-border: #818cf8;
+    --blockquote-bg: rgba(129, 140, 248, 0.08);
+}
+
+/* macOS/iOS 自动深色模式 */
+@media (prefers-color-scheme: dark) {
+    :root:not(.day_mode) {
+        --bg-primary: #0f0f1a;
+        --bg-secondary: #1a1a2e;
+        --bg-tertiary: #252540;
+        --text-primary: #e8e8f0;
+        --text-secondary: #b8b8d0;
+        --text-muted: #8888a8;
+        --accent-color: #818cf8;
+        --accent-light: #a5b4fc;
+        --border-color: rgba(255, 255, 255, 0.08);
+        --shadow-color: rgba(0, 0, 0, 0.3);
+        --cloze-color: #60a5fa;
+        --cloze-bg: rgba(96, 165, 250, 0.15);
+        --code-bg: #1e1e30;
+        --code-border: #2d2d4a;
+        --inline-code-bg: rgba(129, 140, 248, 0.15);
+        --blockquote-border: #818cf8;
+        --blockquote-bg: rgba(129, 140, 248, 0.08);
+    }
+}
+
+/* ================== 基础样式 ================== */
+html {
+    font-size: 18px;
+}
+
+.card {
+    font-family: 'LXGW WenKai', 'Noto Sans SC', 'PingFang SC', sans-serif;
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: var(--text-primary);
+    background: var(--bg-primary);
+    padding: 0;
+    margin: 0;
+    text-align: left;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* 内容容器 */
+.content-wrapper {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+}
+
+/* ================== 填空题样式 ================== */
+.cloze,
+.cloze-inactive {
+    font-weight: 500;
+    padding: 0.1em 0.4em;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.cloze {
+    color: var(--cloze-color);
+    background: var(--cloze-bg);
+    border-bottom: 2px solid var(--cloze-color);
+}
+
+.cloze-inactive {
+    color: var(--text-muted);
+    background: var(--bg-tertiary);
+}
+
+/* ================== Markdown 渲染样式 ================== */
+#rendered-content {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+#rendered-content h1,
+#rendered-content h2,
+#rendered-content h3,
+#rendered-content h4,
+#rendered-content h5,
+#rendered-content h6 {
+    color: var(--text-primary);
+    font-weight: 500;
+    margin-top: 1.5em;
+    margin-bottom: 0.8em;
+    line-height: 1.4;
+}
+
+#rendered-content h1 { font-size: 1.6rem; }
+#rendered-content h2 { font-size: 1.4rem; }
+#rendered-content h3 { font-size: 1.25rem; }
+#rendered-content h4 { font-size: 1.1rem; }
+
+#rendered-content p {
+    margin: 1em 0;
+    color: var(--text-secondary);
+}
+
+#rendered-content strong {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+#rendered-content em {
+    font-style: italic;
+    color: var(--text-secondary);
+}
+
+/* 链接 */
+#rendered-content a {
+    color: var(--accent-color);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s ease;
+}
+
+#rendered-content a:hover {
+    border-bottom-color: var(--accent-color);
+}
+
+/* 列表 */
+#rendered-content ul,
+#rendered-content ol {
+    padding-left: 1.5em;
+    margin: 1em 0;
+    color: var(--text-secondary);
+}
+
+#rendered-content li {
+    margin: 0.4em 0;
+}
+
+#rendered-content li::marker {
+    color: var(--accent-color);
+}
+
+/* 引用块 */
+#rendered-content blockquote {
+    margin: 1.2em 0;
+    padding: 0.8em 1.2em;
+    border-left: 4px solid var(--blockquote-border);
+    background: var(--blockquote-bg);
+    border-radius: 0 8px 8px 0;
+    color: var(--text-secondary);
+}
+
+#rendered-content blockquote p {
+    margin: 0.5em 0;
+}
+
+/* 水平线 */
+#rendered-content hr {
+    border: none;
+    height: 1px;
+    background: var(--border-color);
+    margin: 2em 0;
+}
+
+/* ================== 代码样式 ================== */
+/* 行内代码 */
+#rendered-content code:not(pre code) {
+    font-family: 'Maple Mono', 'SF Mono', 'JetBrains Mono', monospace;
+    font-size: 0.9em;
+    padding: 0.15em 0.4em;
+    background: var(--inline-code-bg);
+    border-radius: 4px;
+    color: var(--accent-color);
+}
+
+/* 代码块 */
+#rendered-content pre {
+    margin: 1.2em 0;
+    padding: 1em 1.2em;
+    background: var(--code-bg);
+    border: 1px solid var(--code-border);
+    border-radius: 10px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+#rendered-content pre code {
+    font-family: 'Maple Mono', 'SF Mono', 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    background: none;
+    padding: 0;
+    color: var(--text-primary);
+}
+
+/* ================== 表格样式 ================== */
+#rendered-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.2em 0;
+    font-size: 0.95em;
+}
+
+#rendered-content th,
+#rendered-content td {
+    padding: 0.8em 1em;
+    border: 1px solid var(--border-color);
+    text-align: left;
+}
+
+#rendered-content th {
+    background: var(--bg-tertiary);
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+#rendered-content tr:nth-child(even) {
+    background: var(--bg-tertiary);
+}
+
+/* ================== LaTeX (KaTeX) 样式 ================== */
+.katex {
+    font-size: 1.1em;
+}
+
+.katex-display {
+    margin: 1.2em 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
+.katex-display > .katex {
+    text-align: center;
+}
+
+/* ================== 图片样式 ================== */
+#rendered-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 1em 0;
+    box-shadow: 0 2px 8px var(--shadow-color);
+}
+
+/* ================== 答案卡片样式 ================== */
+.answer-divider {
+    display: flex;
+    align-items: center;
+    margin: 1.5em 0;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.answer-divider::before,
+.answer-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border-color);
+}
+
+.answer-divider span {
+    padding: 0 1em;
+    font-weight: 500;
+}
+
+/* ================== 响应式设计 ================== */
+@media (max-width: 600px) {
+    html {
+        font-size: 16px;
+    }
+    
+    .content-wrapper {
+        padding: 1.2rem 1rem;
+    }
+    
+    #rendered-content pre {
+        padding: 0.8em 1em;
+        border-radius: 8px;
+    }
+}
+
+/* ================== 打印样式 ================== */
+@media print {
+    .card {
+        background: white;
+        color: black;
+    }
+    
+    #rendered-content pre {
+        border: 1px solid #ddd;
+    }
+}
+
+/* ================== 动画效果 ================== */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.content-wrapper {
+    animation: fadeIn 0.3s ease-out;
+}
