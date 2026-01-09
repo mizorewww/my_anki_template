@@ -64,11 +64,24 @@ def check_connection():
 
 
 # ======================= 媒体文件同步 =======================
-def sync_media_file(filename: str, filepath: Path, timeout: int = 60):
+def check_media_exists(filename: str) -> bool:
+    """检查媒体文件是否已存在于 Anki"""
+    try:
+        result = invoke("getMediaFilesNames", pattern=filename)
+        return filename in result if result else False
+    except:
+        return False
+
+
+def sync_media_file(filename: str, filepath: Path, timeout: int = 60, force: bool = False):
     """同步单个媒体文件到 Anki"""
     if not filepath.exists():
         print(f"  ⚠ 跳过不存在的文件: {filepath}")
         return False
+    
+    # 检查文件是否已存在 (除非强制上传)
+    if not force and check_media_exists(filename):
+        return "skipped"
     
     with open(filepath, "rb") as f:
         data = base64.b64encode(f.read()).decode("utf-8")
@@ -77,11 +90,16 @@ def sync_media_file(filename: str, filepath: Path, timeout: int = 60):
     return True
 
 
-def sync_all_media():
-    """同步所有媒体文件"""
+def sync_all_media(force: bool = False):
+    """同步所有媒体文件
+    
+    Args:
+        force: 如果为 True，则强制重新上传所有文件
+    """
     print("\n📦 同步媒体文件...")
     
     synced = 0
+    skipped = 0
     
     # 同步字体文件
     font_files = [
@@ -93,10 +111,14 @@ def sync_all_media():
         ("_MapleMono-NF-CN-Italic.ttf", "MapleMono-NF-CN-Italic.ttf"),
     ]
     
-    print("  字体文件 (较大，请耐心等待):")
+    print("  字体文件:")
     for anki_name, local_name in font_files:
         filepath = FONTS_DIR / local_name
-        if sync_media_file(anki_name, filepath, timeout=300):
+        result = sync_media_file(anki_name, filepath, timeout=300, force=force)
+        if result == "skipped":
+            print(f"    ⏭ {anki_name} (已存在，跳过)")
+            skipped += 1
+        elif result:
             print(f"    ✓ {anki_name}")
             synced += 1
     
@@ -115,11 +137,15 @@ def sync_all_media():
         # 移除前缀下划线匹配本地文件名
         local_name = filename[1:] if filename.startswith("_") else filename
         filepath = VENDOR_DIR / local_name
-        if sync_media_file(filename, filepath):
+        result = sync_media_file(filename, filepath, force=force)
+        if result == "skipped":
+            print(f"    ⏭ {filename} (已存在，跳过)")
+            skipped += 1
+        elif result:
             print(f"    ✓ {filename}")
             synced += 1
     
-    print(f"\n  共同步 {synced} 个文件")
+    print(f"\n  共同步 {synced} 个文件，跳过 {skipped} 个已存在文件")
     return synced
 
 
