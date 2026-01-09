@@ -25,7 +25,7 @@ TEMPLATE_DIR = SCRIPT_DIR / "templates" / "cloze"
 
 
 # ======================= Anki Connect API =======================
-def invoke(action: str, **params):
+def invoke(action: str, timeout: int = 30, **params):
     """调用 Anki Connect API"""
     request_json = json.dumps({
         "action": action,
@@ -36,7 +36,7 @@ def invoke(action: str, **params):
     try:
         response = urllib.request.urlopen(
             urllib.request.Request(ANKI_CONNECT_URL, request_json),
-            timeout=30
+            timeout=timeout
         )
         result = json.loads(response.read().decode("utf-8"))
         
@@ -64,7 +64,7 @@ def check_connection():
 
 
 # ======================= 媒体文件同步 =======================
-def sync_media_file(filename: str, filepath: Path):
+def sync_media_file(filename: str, filepath: Path, timeout: int = 60):
     """同步单个媒体文件到 Anki"""
     if not filepath.exists():
         print(f"  ⚠ 跳过不存在的文件: {filepath}")
@@ -73,7 +73,7 @@ def sync_media_file(filename: str, filepath: Path):
     with open(filepath, "rb") as f:
         data = base64.b64encode(f.read()).decode("utf-8")
     
-    invoke("storeMediaFile", filename=filename, data=data)
+    invoke("storeMediaFile", timeout=timeout, filename=filename, data=data)
     return True
 
 
@@ -93,10 +93,10 @@ def sync_all_media():
         ("_MapleMono-NF-CN-Italic.ttf", "MapleMono-NF-CN-Italic.ttf"),
     ]
     
-    print("  字体文件:")
+    print("  字体文件 (较大，请耐心等待):")
     for anki_name, local_name in font_files:
         filepath = FONTS_DIR / local_name
-        if sync_media_file(anki_name, filepath):
+        if sync_media_file(anki_name, filepath, timeout=300):
             print(f"    ✓ {anki_name}")
             synced += 1
     
