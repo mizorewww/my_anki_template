@@ -114,5 +114,23 @@ def hello():
 ```
 ```
 
+
+## 📸 Screenshots
+
+### 1. LaTeX Rendering
+*(Pure LaTeX, visually marked active clozes with blue dashed lines)*
+
+![LaTeX Demo](screenshots/latex.png)
+
+### 2. Code Highlighting
+*(Supports multiple languages, auto Light/Dark mode)*
+
+![Code Demo](screenshots/highlight.png)
+
+### 3. Typing & Diff
+*(Supported by Basic-Typing and Cloze-Typing templates)*
+
+![Diff Demo](screenshots/basic_input_show_diff.png)
+
 ---
 **Enjoy your learning!**

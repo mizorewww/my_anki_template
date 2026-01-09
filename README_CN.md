@@ -114,5 +114,23 @@ def hello():
 ```
 ```
 
+
+## 📸 截图展示
+
+### 1. LaTeX 公式渲染
+*(纯净渲染，支持行内/块级公式，答案通过蓝色虚线标注)*
+
+![LaTeX Demo](screenshots/latex.png)
+
+### 2. 代码高亮
+*(支持多种语言，日间/夜间模式自动切换)*
+
+![Code Demo](screenshots/highlight.png)
+
+### 3. 拼写检查 (Diff)
+*(Basic-Typing 和 Cloze-Typing 模板均支持)*
+
+![Diff Demo](screenshots/basic_input_show_diff.png)
+
 ---
 **祝学习愉快！**
