@@ -107,12 +107,11 @@ $${{c1::x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}}}$$
 *(Note: The active part will be visually marked with a blue dashed line on the back)*
 
 ### Code Block
-```markdown
 ```python
 def hello():
     print("Hello Anki")
 ```
-```
+
 
 
 ## 📸 Screenshots

@@ -107,12 +107,14 @@ $${{c1::x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}}}$$
 *(注: 背面会用蓝色虚线通过 CSS 标注答案位置，公式内容保持纯文本渲染)*
 
 ### 代码块
-```markdown
+
 ```python
 def hello():
     print("Hello Anki")
 ```
-```
+
+
+
 
 
 ## 📸 截图展示
