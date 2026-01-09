@@ -1,4 +1,9 @@
-*.ttf
 .venv/
 .DS_Store
- 
+__pycache__/
+*.log
+.gemini/
+template_preview.html
+fonts/
+templates/vendor/
+
