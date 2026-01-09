@@ -124,20 +124,29 @@ def sync_all_media(force: bool = False):
     
     # 同步 JS/CSS 库
     vendor_files = [
+        "_renderer.js",
         "_marked.min.js",
         "_katex.min.js",
         "_katex.min.css",
         "_highlight.min.js",
         "_github.min.css",
         "_github-dark.min.css",
+
     ]
     
     print("  JS/CSS 库:")
     for filename in vendor_files:
-        # 移除前缀下划线匹配本地文件名
-        local_name = filename[1:] if filename.startswith("_") else filename
-        filepath = VENDOR_DIR / local_name
+        # 特殊处理 renderer.js (位于 cloze 目录而非 vendor)
+        if filename == "_renderer.js":
+            filepath = SCRIPT_DIR / "templates" / "cloze" / "renderer.js"
+
+        else:
+            # 移除前缀下划线匹配本地文件名
+            local_name = filename[1:] if filename.startswith("_") else filename
+            filepath = VENDOR_DIR / local_name
+            
         result = sync_media_file(filename, filepath, force=force)
+
         if result == "skipped":
             print(f"    ⏭ {filename} (已存在，跳过)")
             skipped += 1
