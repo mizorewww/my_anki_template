@@ -75,7 +75,9 @@
 }
 
 /* 深色主题 */
-.nightMode, .night_mode, [data-theme="dark"] {
+.nightMode,
+.night_mode,
+[data-theme="dark"] {
     --bg-primary: #0f0f1a;
     --bg-secondary: #1a1a2e;
     --bg-tertiary: #252540;
@@ -163,6 +165,21 @@ html {
     background: var(--bg-tertiary);
 }
 
+/* 公式高亮标记 (不修改 LaTeX 内容) */
+.cloze-marker-block {
+    width: 100%;
+    height: 0;
+    border-top: 2px dashed var(--cloze-color);
+    margin-top: 0.4em;
+    margin-bottom: 0.2em;
+    opacity: 0.8;
+}
+
+.cloze-marker-inline {
+    border-bottom: 2px dashed var(--cloze-color);
+    padding-bottom: 2px;
+}
+
 /* ================== Markdown 渲染样式 ================== */
 #rendered-content {
     word-wrap: break-word;
@@ -182,10 +199,21 @@ html {
     line-height: 1.4;
 }
 
-#rendered-content h1 { font-size: 1.6rem; }
-#rendered-content h2 { font-size: 1.4rem; }
-#rendered-content h3 { font-size: 1.25rem; }
-#rendered-content h4 { font-size: 1.1rem; }
+#rendered-content h1 {
+    font-size: 1.6rem;
+}
+
+#rendered-content h2 {
+    font-size: 1.4rem;
+}
+
+#rendered-content h3 {
+    font-size: 1.25rem;
+}
+
+#rendered-content h4 {
+    font-size: 1.1rem;
+}
 
 #rendered-content p {
     margin: 1em 0;
@@ -320,7 +348,7 @@ html {
     -webkit-overflow-scrolling: touch;
 }
 
-.katex-display > .katex {
+.katex-display>.katex {
     text-align: center;
 }
 
@@ -360,11 +388,11 @@ html {
     html {
         font-size: 16px;
     }
-    
+
     .content-wrapper {
         padding: 1.2rem 1rem;
     }
-    
+
     #rendered-content pre {
         padding: 0.8em 1em;
         border-radius: 8px;
@@ -377,7 +405,7 @@ html {
         background: white;
         color: black;
     }
-    
+
     #rendered-content pre {
         border: 1px solid #ddd;
     }
@@ -385,8 +413,15 @@ html {
 
 /* ================== 动画效果 ================== */
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .content-wrapper {

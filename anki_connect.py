@@ -139,13 +139,15 @@ def sync_all_media(force: bool = False):
         # 特殊处理 renderer.js (位于 cloze 目录而非 vendor)
         if filename == "_renderer.js":
             filepath = SCRIPT_DIR / "templates" / "cloze" / "renderer.js"
-
+            # renderer.js 经常变动，强制同步
+            current_force = True
         else:
             # 移除前缀下划线匹配本地文件名
             local_name = filename[1:] if filename.startswith("_") else filename
             filepath = VENDOR_DIR / local_name
+            current_force = force
             
-        result = sync_media_file(filename, filepath, force=force)
+        result = sync_media_file(filename, filepath, force=current_force)
 
         if result == "skipped":
             print(f"    ⏭ {filename} (已存在，跳过)")

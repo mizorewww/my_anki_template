@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
-"""调试脚本：获取卡片完整渲染HTML"""
+"""调试：尝试直接更新模板内容"""
 
 import json
 import urllib.request
+from pathlib import Path
 
 ANKI_CONNECT_URL = "http://127.0.0.1:8765"
+SCRIPT_DIR = Path(__file__).parent.resolve()
+TEMPLATE_DIR = SCRIPT_DIR / "templates" / "cloze"
 
 def invoke(action, **params):
     request_json = json.dumps({
@@ -19,51 +22,29 @@ def invoke(action, **params):
     )
     return json.loads(response.read().decode("utf-8"))
 
-# 获取第一张卡片的完整渲染
-result = invoke("findCards", query="note:Cloze-Modern")
-card_ids = result.get("result", [])
+# 读取新模板
+front = (TEMPLATE_DIR / "front.html").read_text()
+back = (TEMPLATE_DIR / "back.html").read_text()
 
-if card_ids:
-    result = invoke("cardsInfo", cards=[card_ids[0]])
-    card = result.get("result", [])[0]
-    
-    question = card.get('question', '')
-    
-    # 检查关键元素
-    print("=" * 60)
-    print("模板结构检查")
-    print("=" * 60)
-    
-    checks = [
-        ("隐藏内容 div", 'id="raw-content"' in question),
-        ("渲染内容 div", 'id="rendered-content"' in question),
-        ("marked.js 引用", '_marked.min.js' in question),
-        ("katex.js 引用", '_katex.min.js' in question),
-        ("highlight.js 引用", '_highlight.min.js' in question),
-        ("katex.css 引用", '_katex.min.css' in question),
-    ]
-    
-    for name, exists in checks:
-        status = "✓" if exists else "✗"
-        print(f"  {status} {name}")
-    
-    # 提取 raw-content 的内容
-    import re
-    match = re.search(r'id="raw-content"[^>]*>(.*?)</div>', question, re.DOTALL)
-    if match:
-        print("\n" + "=" * 60)
-        print("raw-content 内容 (前500字符)")
-        print("=" * 60)
-        print(match.group(1)[:500])
-    
-    # 检查脚本部分
-    print("\n" + "=" * 60)
-    print("脚本引用检查")
-    print("=" * 60)
-    script_refs = re.findall(r'<script[^>]*src="([^"]+)"', question)
-    for ref in script_refs:
-        print(f"  引用: {ref}")
-    
-    link_refs = re.findall(r'<link[^>]*href="([^"]+)"', question)
-    for ref in link_refs:
-        print(f"  样式: {ref}")
+print(f"Front 模板长度: {len(front)} 字符")
+print(f"Back 模板长度: {len(back)} 字符")
+
+# 检查模板中是否包含 cloze 字段
+print(f"\nFront 包含 {{{{cloze:Text}}}}: {'{{cloze:Text}}' in front}")
+print(f"Back 包含 {{{{cloze:Text}}}}: {'{{cloze:Text}}' in back}")
+
+# 尝试更新
+print("\n尝试更新模板...")
+try:
+    result = invoke("updateModelTemplates", model={
+        "name": "Cloze-Modern",
+        "templates": {
+            "Cloze": {
+                "Front": front,
+                "Back": back,
+            }
+        }
+    })
+    print(f"结果: {result}")
+except Exception as e:
+    print(f"错误: {e}")

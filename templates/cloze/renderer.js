@@ -59,15 +59,13 @@ function renderCloze(rawContentId, renderedContentId, mode) {
     const renderLatex = function (match, index) {
         const item = latexTokens[parseInt(index)];
         let formula = item.formula;
+        let hasActiveCloze = false;
 
         // Handle clozes inside formula
         if (formula.includes('%%CLOZE_')) {
             formula = formula.replace(/%%CLOZE_(\d+)%%/g, function (m, idx) {
                 const token = clozeTokens[parseInt(idx)];
 
-                // Determine if this is the ACTIVE cloze (the answer for this card)
-                // Anki renders active cloze as <span class="cloze">...</span>
-                // Inactive cloze as <span class="cloze-inactive">...</span> (if configured) or plain text
                 const isActive = !token.includes('cloze-inactive');
 
                 // FRONT SIDE: Hide active cloze
@@ -75,10 +73,15 @@ function renderCloze(rawContentId, renderedContentId, mode) {
                     return '\\text{[...]}';
                 }
 
-                // Extract content for display (Back side or Inactive)
+                // BACK SIDE: flag detection
+                if (mode === 'back' && isActive) {
+                    hasActiveCloze = true;
+                }
+
+                // Extract content
                 let content = '';
                 const contentMatch = token.match(/>([^<]+)</);
-                const dataClozeMatch = token.match(/data-cloze="([^"]*)"/); // Fallback for some Anki versions
+                const dataClozeMatch = token.match(/data-cloze="([^"]*)"/);
 
                 if (contentMatch && contentMatch[1] && contentMatch[1] !== '[...]') {
                     content = contentMatch[1];
@@ -88,17 +91,11 @@ function renderCloze(rawContentId, renderedContentId, mode) {
                     content = div.textContent;
                 }
 
-                // BACK SIDE: Highlight active cloze
-                if (mode === 'back' && isActive) {
-                    // Use bold underline to distinguish answer without changing font family or box
-                    return '\\underline{\\mathbf{' + content + '}}';
-                }
-
-                // Inactive cloze or just content
+                // Return pure content for LaTeX rendering (no modification of user fields)
                 return content;
             });
 
-            // Clean up extra braces left by Anki {{c1::...}}
+            // Clean up braces
             const openCount = (formula.match(/\{/g) || []).length;
             const closeCount = (formula.match(/\}/g) || []).length;
             if (closeCount > openCount) {
@@ -107,11 +104,25 @@ function renderCloze(rawContentId, renderedContentId, mode) {
         }
 
         try {
-            return katex.renderToString(formula.trim(), {
+            const html = katex.renderToString(formula.trim(), {
                 displayMode: item.type === 'block',
                 throwOnError: false,
-                output: 'html'
+                output: 'html',
+                trust: true
             });
+
+            // Append visual marker if we have active cloze (Back side only)
+            if (hasActiveCloze && mode === 'back') {
+                if (item.type === 'block') {
+                    // Block: Add dashed line below
+                    return html + '<div class="cloze-marker-block"></div>';
+                } else {
+                    // Inline: Add dashed bottom border via wrapper
+                    return '<span class="cloze-marker-inline">' + html + '</span>';
+                }
+            }
+
+            return html;
         } catch (e) {
             return '<span class="katex-error">' + formula + '</span>';
         }

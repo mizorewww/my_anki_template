@@ -10,6 +10,14 @@
 - **健壮渲染引擎**: 采用"五阶段令牌化渲染"，完美解决 Anki 标签与 Markdown/LaTeX 的兼容性冲突。
 - **自定义字体**: 内置 `霞鹜文楷` 与 `Maple Mono` 支持。
 
+## 截图
+
+![code_highlight](screenshots/highlight.png)
+支持高亮
+
+![latex](screenshots/latex.png)
+支持LaTeX
+
 ## 项目结构 / Project Structure
 
 ```
