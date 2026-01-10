@@ -222,6 +222,64 @@ sync_all_media(force=True)
 
 ---
 
+## AnkiMobile 兼容性
+
+AnkiMobile 的 WebView 行为与桌面版不同，需要特别注意以下问题：
+
+### 首次加载黑屏问题
+
+**问题表现**: 第一张卡片加载时黑屏，点击后才显示内容（但已跳转到背面）。
+
+**原因**: 
+1. CSS `fadeIn` 动画从 `opacity: 0` 开始，如果 JS 渲染延迟，页面保持透明
+2. 外部 JS 库在 AnkiMobile 上可能需要更长时间加载
+3. `renderCloze()` 在库未完全加载时被调用
+
+**解决方案**:
+
+1. **避免 opacity 动画**:
+```css
+/* ✗ 错误 - 会导致黑屏 */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* ✓ 正确 - 只使用位移动画 */
+@keyframes slideIn {
+    from { transform: translateY(8px); }
+    to { transform: translateY(0); }
+}
+```
+
+2. **在 HTML 中提供回退内容**:
+```html
+<!-- ✗ 错误 - 初始为空，JS 失败则黑屏 -->
+<div id="rendered-content"></div>
+
+<!-- ✓ 正确 - 始终有内容显示 -->
+<div id="rendered-content">{{cloze:Text}}</div>
+```
+
+3. **使用库加载检测和重试机制**:
+```javascript
+(function() {
+    var maxRetries = 50, retryCount = 0;
+    function tryRender() {
+        if (typeof marked !== 'undefined' && typeof katex !== 'undefined' && 
+            typeof hljs !== 'undefined' && typeof renderCloze === 'function') {
+            renderCloze('raw-content', 'rendered-content', 'front');
+        } else if (retryCount++ < maxRetries) {
+            setTimeout(tryRender, 20);
+        }
+        // 超过重试次数则保留原始内容作为回退
+    }
+    tryRender();
+})();
+```
+
+---
+
 ## 常见问题
 
 ### Q: 卡片显示空白
