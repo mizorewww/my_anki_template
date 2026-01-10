@@ -8,10 +8,14 @@
 <link id="hljs-dark" rel="stylesheet" href="_github-dark.min.css" media="(prefers-color-scheme: dark)">
 
 <div class="content-wrapper">
-    <div id="rendered-content"></div>
+    <!-- 
+        关键修复: 直接在这里显示原始内容作为回退
+        JavaScript 加载完成后会用渲染后的内容替换
+    -->
+    <div id="rendered-content">{{cloze:Text}}</div>
 </div>
 
-<!-- 原始内容存储 (使用 HTML 注释避免反引号问题) -->
+<!-- 原始内容存储 -->
 <div id="raw-content" style="display:none;">{{cloze:Text}}</div>
 
 <script src="_marked.min.js"></script>
@@ -20,5 +24,21 @@
 <script src="_renderer.js"></script>
 
 <script>
-    renderCloze('raw-content', 'rendered-content', 'back');
+    // AnkiMobile 兼容: 立即尝试渲染，带重试机制
+    (function () {
+        var maxRetries = 50;
+        var retryCount = 0;
+
+        function tryRender() {
+            if (typeof marked !== 'undefined' && typeof katex !== 'undefined' &&
+                typeof hljs !== 'undefined' && typeof renderCloze === 'function') {
+                renderCloze('raw-content', 'rendered-content', 'back');
+            } else if (retryCount < maxRetries) {
+                retryCount++;
+                setTimeout(tryRender, 20);
+            }
+        }
+
+        tryRender();
+    })();
 </script>

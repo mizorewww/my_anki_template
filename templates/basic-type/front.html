@@ -4,7 +4,7 @@
 <link id="hljs-dark" rel="stylesheet" href="_github-dark.min.css" media="(prefers-color-scheme: dark)">
 
 <div class="content-wrapper">
-    <div id="rendered-front"></div>
+    <div id="rendered-front">{{Front}}</div>
     <div class="input-area">
         {{type:Back}}
     </div>
@@ -18,5 +18,16 @@
 <script src="_renderer.js"></script>
 
 <script>
-    renderCloze('raw-front', 'rendered-front', 'front');
+    (function () {
+        var maxRetries = 50, retryCount = 0;
+        function tryRender() {
+            if (typeof marked !== 'undefined' && typeof katex !== 'undefined' &&
+                typeof hljs !== 'undefined' && typeof renderCloze === 'function') {
+                renderCloze('raw-front', 'rendered-front', 'front');
+            } else if (retryCount++ < maxRetries) {
+                setTimeout(tryRender, 20);
+            }
+        }
+        tryRender();
+    })();
 </script>

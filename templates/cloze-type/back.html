@@ -4,7 +4,7 @@
 <link id="hljs-dark" rel="stylesheet" href="_github-dark.min.css" media="(prefers-color-scheme: dark)">
 
 <div class="content-wrapper">
-    <div id="rendered-content"></div>
+    <div id="rendered-content">{{cloze:Text}}</div>
     <hr class="separator">
     <div class="input-area">
         {{type:cloze:Text}}
@@ -19,5 +19,16 @@
 <script src="_renderer.js"></script>
 
 <script>
-    renderCloze('raw-content', 'rendered-content', 'back');
+    (function () {
+        var maxRetries = 50, retryCount = 0;
+        function tryRender() {
+            if (typeof marked !== 'undefined' && typeof katex !== 'undefined' &&
+                typeof hljs !== 'undefined' && typeof renderCloze === 'function') {
+                renderCloze('raw-content', 'rendered-content', 'back');
+            } else if (retryCount++ < maxRetries) {
+                setTimeout(tryRender, 20);
+            }
+        }
+        tryRender();
+    })();
 </script>

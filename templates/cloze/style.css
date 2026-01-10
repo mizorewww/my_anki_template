@@ -486,18 +486,17 @@ hr.separator {
 }
 
 /* ================== 动画效果 ================== */
-@keyframes fadeIn {
+/* 注意: 移除 opacity 动画以避免 AnkiMobile 首次加载黑屏问题 */
+@keyframes slideIn {
     from {
-        opacity: 0;
-        transform: translateY(10px);
+        transform: translateY(8px);
     }
 
     to {
-        opacity: 1;
         transform: translateY(0);
     }
 }
 
 .content-wrapper {
-    animation: fadeIn 0.3s ease-out;
+    animation: slideIn 0.25s ease-out;
 }
