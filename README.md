@@ -27,7 +27,7 @@ A beautiful, modern Anki template supporting Markdown, LaTeX, code highlighting,
 
 ## 🗂 Note Types
 
-Running the sync script will automatically create these 4 note types in Anki:
+Running the sync script will automatically create these **5** note types in Anki:
 
 ### 1. Cloze-Modern (Standard Cloze)
 - **Type**: Cloze
@@ -49,7 +49,13 @@ Running the sync script will automatically create these 4 note types in Anki:
   - `Back`: Answer shown after flipping.
 - **Use Case**: Concept definitions, open-ended questions.
 
-### 4. Basic-Modern-Typing (Typing Q&A)
+### 4. Basic-Modern-Reversed (Two-Way Q&A)
+- **Type**: Basic
+- **Description**: One note generates **two cards**: Front→Back and Back→Front.
+- **Fields**: Same as Basic-Modern.
+- **Use Case**: Vocabulary (English ↔ Chinese), bidirectional memorization.
+
+### 5. Basic-Modern-Typing (Typing Q&A)
 - **Type**: Basic
 - **Description**: Question on front with an input box. Type the full answer to check against the Back field.
 - **Use Case**: Memorizing exact definitions or code snippets.

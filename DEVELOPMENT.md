@@ -17,21 +17,35 @@
 
 ```
 my_anki_template/
-├── anki_connect.py           # Anki Connect 同步脚本
+├── anki_connect.py           # Anki Connect 同步脚本 (自动 git pull)
 ├── sync_libs.sh              # 下载 JS/CSS 依赖
 ├── sync_font.sh              # 下载字体文件
+├── CARDS.md                  # 卡片类型说明文档
 ├── templates/
+│   ├── shared/               # ⭐ 共享资源 (所有模板通用)
+│   │   ├── style.css         #    统一样式表
+│   │   └── renderer.js       #    渲染器脚本
 │   ├── cloze/                # 填空题模板
 │   │   ├── front.html
-│   │   ├── back.html
-│   │   └── style.css
-│   ├── basic/                # [示例] 基础问答模板
-│   │   ├── front.html
-│   │   ├── back.html
-│   │   └── style.css
+│   │   └── back.html
+│   ├── cloze-type/           # 填空打字模板
+│   ├── basic/                # 基础问答模板
+│   ├── basic-reversed/       # 双向问答模板 (1笔记→2卡片)
+│   ├── basic-type/           # 打字问答模板
 │   └── vendor/               # 第三方库 (自动生成)
 └── fonts/                    # 字体文件 (自动生成)
 ```
+
+### 设计说明
+
+**共享资源 (`templates/shared/`)**：
+- `style.css` - 所有笔记类型使用同一套样式，确保视觉一致性
+- `renderer.js` - 统一的 Markdown/LaTeX/代码渲染逻辑
+
+这种设计的好处：
+1. 修改样式或渲染逻辑时，只需更新一处
+2. 所有卡片外观保持一致
+3. 减少代码重复
 
 ---
 

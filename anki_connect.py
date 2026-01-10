@@ -2,26 +2,27 @@
 """
 Anki Connect 同步脚本
 功能：
-1. 创建/更新 Cloze-Modern 笔记类型
-2. 同步媒体文件（字体、JS/CSS 库）
-3. 创建示例卡片
+1. 自动拉取最新代码 (git pull)
+2. 创建/更新笔记类型
+3. 同步媒体文件（字体、JS/CSS 库）
+4. 创建示例卡片
 """
 
 import json
 import urllib.request
 import base64
 import os
+import subprocess
 from pathlib import Path
 
 # ======================= 配置 =======================
 ANKI_CONNECT_URL = "http://127.0.0.1:8765"
-MODEL_NAME = "Cloze-Modern"
 
 # 目录配置
 SCRIPT_DIR = Path(__file__).parent.resolve()
 FONTS_DIR = SCRIPT_DIR / "fonts"
 VENDOR_DIR = SCRIPT_DIR / "templates" / "vendor"
-TEMPLATE_DIR = SCRIPT_DIR / "templates" / "cloze"
+SHARED_DIR = SCRIPT_DIR / "templates" / "shared"
 
 
 # ======================= Anki Connect API =======================
@@ -136,9 +137,9 @@ def sync_all_media(force: bool = False):
     
     print("  JS/CSS 库:")
     for filename in vendor_files:
-        # 特殊处理 renderer.js (位于 cloze 目录而非 vendor)
+        # 特殊处理 renderer.js (位于 shared 目录)
         if filename == "_renderer.js":
-            filepath = SCRIPT_DIR / "templates" / "cloze" / "renderer.js"
+            filepath = SHARED_DIR / "renderer.js"
             # renderer.js 经常变动，强制同步
             current_force = True
         else:
@@ -175,21 +176,21 @@ MODELS = [
         "type": "cloze",
         "fields": ["Text", "Extra"],
         "templates": [{"name": "Cloze", "front": "cloze/front.html", "back": "cloze/back.html"}],
-        "css": "cloze/style.css"
+        "css": "shared/style.css"
     },
     {
         "name": "Cloze-Modern-Typing",
         "type": "cloze",
         "fields": ["Text", "Extra"],
         "templates": [{"name": "Cloze Typing", "front": "cloze-type/front.html", "back": "cloze-type/back.html"}],
-        "css": "cloze/style.css"
+        "css": "shared/style.css"
     },
     {
         "name": "Basic-Modern",
         "type": "basic",  # basic (isCloze=False)
         "fields": ["Front", "Back"],
         "templates": [{"name": "Card 1", "front": "basic/front.html", "back": "basic/back.html"}],
-        "css": "cloze/style.css"
+        "css": "shared/style.css"
     },
     {
         "name": "Basic-Modern-Reversed",
@@ -199,14 +200,14 @@ MODELS = [
             {"name": "Card 1", "front": "basic-reversed/card1-front.html", "back": "basic-reversed/card1-back.html"},
             {"name": "Card 2 (Reversed)", "front": "basic-reversed/card2-front.html", "back": "basic-reversed/card2-back.html"}
         ],
-        "css": "cloze/style.css"
+        "css": "shared/style.css"
     },
     {
         "name": "Basic-Modern-Typing",
         "type": "basic",
         "fields": ["Front", "Back"],
         "templates": [{"name": "Card 1", "front": "basic-type/front.html", "back": "basic-type/back.html"}],
-        "css": "cloze/style.css"
+        "css": "shared/style.css"
     }
 ]
 
@@ -384,16 +385,46 @@ def create_example_cards():
 
 
 # ======================= 主程序 =======================
+def try_git_pull():
+    """尝试拉取最新代码"""
+    print("\n🔄 检查更新...")
+    try:
+        result = subprocess.run(
+            ["git", "pull"],
+            cwd=SCRIPT_DIR,
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+        if result.returncode == 0:
+            output = result.stdout.strip()
+            if "Already up to date" in output or "已是最新" in output:
+                print("  ✓ 已是最新版本")
+            else:
+                print(f"  ✓ 已更新: {output.split(chr(10))[0]}")
+        else:
+            print(f"  ⚠ Git pull 失败，继续运行...")
+    except FileNotFoundError:
+        print("  ⚠ Git 未安装，跳过更新检查")
+    except subprocess.TimeoutExpired:
+        print("  ⚠ Git pull 超时，继续运行...")
+    except Exception as e:
+        print(f"  ⚠ 更新检查失败: {e}，继续运行...")
+
+
 def main():
     print("=" * 50)
-    print("     Anki Connect 同步工具 v1.0")
+    print("     Anki Connect 同步工具 v1.1")
     print("=" * 50)
+    
+    # 0. 尝试拉取最新代码
+    try_git_pull()
     
     # 1. 检查连接
     if not check_connection():
         return
     
-    # 1. 同步媒体文件
+    # 2. 同步媒体文件
     print("\n📦 同步媒体文件...")
     sync_all_media()
     
