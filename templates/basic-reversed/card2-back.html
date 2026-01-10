@@ -1,0 +1,34 @@
+<!-- Basic Modern Reversed - Card 2 Back (Back → Front, Reversed) -->
+<link rel="stylesheet" href="_katex.min.css">
+<link id="hljs-light" rel="stylesheet" href="_github.min.css" media="(prefers-color-scheme: light)">
+<link id="hljs-dark" rel="stylesheet" href="_github-dark.min.css" media="(prefers-color-scheme: dark)">
+
+<div class="content-wrapper">
+    <div id="rendered-back">{{Back}}</div>
+    <hr class="separator">
+    <div id="rendered-front">{{Front}}</div>
+</div>
+
+<div id="raw-back" style="display:none;">{{Back}}</div>
+<div id="raw-front" style="display:none;">{{Front}}</div>
+
+<script src="_marked.min.js"></script>
+<script src="_katex.min.js"></script>
+<script src="_highlight.min.js"></script>
+<script src="_renderer.js"></script>
+
+<script>
+    (function () {
+        var maxRetries = 50, retryCount = 0;
+        function tryRender() {
+            if (typeof marked !== 'undefined' && typeof katex !== 'undefined' &&
+                typeof hljs !== 'undefined' && typeof renderCloze === 'function') {
+                renderCloze('raw-back', 'rendered-back', 'front');
+                renderCloze('raw-front', 'rendered-front', 'back');
+            } else if (retryCount++ < maxRetries) {
+                setTimeout(tryRender, 20);
+            }
+        }
+        tryRender();
+    })();
+</script>

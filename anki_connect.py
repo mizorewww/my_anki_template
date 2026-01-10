@@ -192,6 +192,16 @@ MODELS = [
         "css": "cloze/style.css"
     },
     {
+        "name": "Basic-Modern-Reversed",
+        "type": "basic",
+        "fields": ["Front", "Back"],
+        "templates": [
+            {"name": "Card 1", "front": "basic-reversed/card1-front.html", "back": "basic-reversed/card1-back.html"},
+            {"name": "Card 2 (Reversed)", "front": "basic-reversed/card2-front.html", "back": "basic-reversed/card2-back.html"}
+        ],
+        "css": "cloze/style.css"
+    },
+    {
         "name": "Basic-Modern-Typing",
         "type": "basic",
         "fields": ["Front", "Back"],
@@ -305,6 +315,22 @@ y = (1, 2) # Tuple
 """
         },
         "tags": ["example", "basic-modern"]
+    },
+    {
+        "deckName": "Default",
+        "modelName": "Basic-Modern-Reversed",
+        "fields": {
+            "Front": """## 词汇学习
+**Apple** (noun)
+""",
+            "Back": """**苹果** 🍎
+
+一种常见的水果，通常为红色、绿色或黄色。
+
+> 例句: *An apple a day keeps the doctor away.*
+"""
+        },
+        "tags": ["example", "basic-reversed"]
     },
     {
         "deckName": "Default",
