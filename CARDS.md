@@ -196,8 +196,10 @@ def hello():
 ## 🚀 快速开始
 
 1. 确保 Anki 已安装 [AnkiConnect](https://ankiweb.net/shared/info/2055492159) 插件
-2. 运行同步脚本：
+2. 运行资源脚本和同步脚本：
    ```bash
+   bash sync_font.sh
+   bash sync_libs.sh
    python3 anki_connect.py
    ```
 3. 在 Anki 中选择对应的笔记类型创建卡片

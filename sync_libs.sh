@@ -21,6 +21,7 @@ HLJS_VERSION="11.11.1"
 MARKED_URL="https://cdn.jsdelivr.net/npm/marked@${MARKED_VERSION}/marked.min.js"
 KATEX_JS_URL="https://cdn.jsdelivr.net/npm/katex@${KATEX_VERSION}/dist/katex.min.js"
 KATEX_CSS_URL="https://cdn.jsdelivr.net/npm/katex@${KATEX_VERSION}/dist/katex.min.css"
+KATEX_FONT_URL="https://cdn.jsdelivr.net/npm/katex@${KATEX_VERSION}/dist/fonts"
 HLJS_JS_URL="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@${HLJS_VERSION}/build/highlight.min.js"
 HLJS_CSS_LIGHT_URL="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@${HLJS_VERSION}/build/styles/github.min.css"
 HLJS_CSS_DARK_URL="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@${HLJS_VERSION}/build/styles/github-dark.min.css"
@@ -65,7 +66,9 @@ download_file() {
         fi
         
         info "正在下载: $(basename "$output")"
-        curl -sL "$url" -o "$output"
+        curl --fail --silent --show-error --location \
+            --connect-timeout 15 --max-time 180 \
+            "$url" -o "$output"
         ret=$?
         
         ((count++))
@@ -98,6 +101,13 @@ echo ""
 echo -e "${BLUE}>>> 处理任务 2/3: KaTeX (LaTeX 渲染)${NC}"
 download_file "$KATEX_JS_URL" "$VENDOR_DIR/katex.min.js"
 download_file "$KATEX_CSS_URL" "$VENDOR_DIR/katex.min.css"
+
+info "正在下载 KaTeX 字体并改写 CSS 路径..."
+KATEX_FONT_FILES=$(grep -o 'fonts/KaTeX_[^)]*' "$VENDOR_DIR/katex.min.css" | sort -u | sed 's#fonts/##')
+for font_file in $KATEX_FONT_FILES; do
+    download_file "$KATEX_FONT_URL/$font_file" "$VENDOR_DIR/$font_file"
+    sed -i "s#fonts/$font_file#_$font_file#g" "$VENDOR_DIR/katex.min.css"
+done
 
 # 4. 下载 Highlight.js
 echo ""

@@ -17,7 +17,7 @@
 
 ```
 my_anki_template/
-├── anki_connect.py           # Anki Connect 同步脚本 (自动 git pull)
+├── anki_connect.py           # Anki Connect 同步脚本 (--pull 时执行 git pull)
 ├── sync_libs.sh              # 下载 JS/CSS 依赖
 ├── sync_font.sh              # 下载字体文件
 ├── CARDS.md                  # 卡片类型说明文档
@@ -319,8 +319,9 @@ const content = document.getElementById('raw-content').innerHTML;
 
 **检查步骤**:
 1. 运行 `./sync_libs.sh` 确保库文件存在
-2. 运行 `python anki_connect.py` 同步到 Anki
-3. 在模板中添加加载检查：
+2. 运行 `./sync_font.sh` 确保字体文件存在
+3. 运行 `python anki_connect.py` 同步到 Anki
+4. 在模板中添加加载检查：
 
 ```javascript
 if (typeof marked === 'undefined') {

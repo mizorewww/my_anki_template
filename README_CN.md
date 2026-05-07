@@ -2,7 +2,7 @@
 
 [English](README.md) | **中文**
 
-专为追求审美与功能的学习者打造的 Anki 模板，完美支持 Markdown、LaTeX 公式、代码高亮，并包含 4 种专用笔记类型。
+专为追求审美与功能的学习者打造的 Anki 模板，完美支持 Markdown、LaTeX 公式、代码高亮，并包含 5 种专用笔记类型。
 
 ## ✨ 功能特性
 
@@ -86,10 +86,14 @@
    python3 anki_connect.py
    ```
    脚本将自动完成以下操作:
-   - ✅ 自动检查更新 (git pull)
    - ✅ 将下载的字体和库文件同步到 Anki 媒体文件夹。
    - ✅ 在 Anki 中创建/更新 5 种笔记类型。
    - ✅ 在 "Default" 牌组中创建示例卡片。
+
+   如需同步前拉取远端更新，请显式运行：
+   ```bash
+   python3 anki_connect.py --pull
+   ```
 
 ## ✍️ 书写示例
 

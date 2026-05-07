@@ -2,7 +2,7 @@
 
 **English** | [中文](README_CN.md)
 
-A beautiful, modern Anki template supporting Markdown, LaTeX, code highlighting, and 4 specialized note types. Built for serious learners who care about aesthetics and functionality.
+A beautiful, modern Anki template supporting Markdown, LaTeX, code highlighting, and 5 specialized note types. Built for serious learners who care about aesthetics and functionality.
 
 ## ✨ Features
 
@@ -87,8 +87,13 @@ Running the sync script will automatically create these **5** note types in Anki
    ```
    This script will:
    - ✅ Sync downloaded fonts and libraries to Anki media folder.
-   - ✅ Create/Update the 4 Note Types in Anki.
+   - ✅ Create/Update the 5 Note Types in Anki.
    - ✅ Create Example Cards in the "Default" deck.
+
+   To pull remote updates before syncing, opt in explicitly:
+   ```bash
+   python3 anki_connect.py --pull
+   ```
 
 ## ✍️ Usage Examples
 

@@ -66,6 +66,11 @@ download_file() {
     local count=0
     local ret=1
 
+    if [ -s "$output" ]; then
+        success "已存在，跳过下载: $(basename "$output")"
+        return 0
+    fi
+
     while [ $ret -ne 0 ] && [ $count -lt $MAX_RETRIES ]; do
         if [ $count -gt 0 ]; then
             warn "下载失败，正在尝试第 $count/$MAX_RETRIES 次重试..."
@@ -77,7 +82,8 @@ download_file() {
         # --show-progress: 强制显示进度条 (解决-q不仅显示进度条的问题)
         # --progress=bar:force:noscroll: 美观的进度条样式
         info "正在下载: $(basename "$output")"
-        wget -q --show-progress --progress=bar:force:noscroll "$url" -O "$output"
+        wget -q --show-progress --progress=bar:force:noscroll \
+            --timeout=30 --tries=1 "$url" -O "$output"
         ret=$?
         
         ((count++))
@@ -109,7 +115,9 @@ download_file "$MAPLE_URL" "$TEMP_DIR/maple-font.zip"
 info "正在解压 Maple Font..."
 # 后台解压，前台显示动画
 unzip -q -o "$TEMP_DIR/maple-font.zip" -d "$FONT_DIR" &
-spinner $!
+unzip_pid=$!
+spinner "$unzip_pid"
+wait "$unzip_pid" || error "Maple Font 解压失败。"
 success "Maple Font 解压完成"
 
 # 3. 处理 LXGW WenKai 字体
@@ -119,7 +127,9 @@ download_file "$LXGW_URL" "$TEMP_DIR/lxgw-wenkai.zip"
 
 info "正在解压 LXGW WenKai (文件较大，请稍候)..."
 unzip -q -o "$TEMP_DIR/lxgw-wenkai.zip" -d "$TEMP_DIR/lxgw-wenkai" &
-spinner $!
+unzip_pid=$!
+spinner "$unzip_pid"
+wait "$unzip_pid" || error "LXGW WenKai 解压失败。"
 success "解压完成，正在移动字体文件..."
 
 # 移动文件 (增加判断，防止目录结构变化导致错误)

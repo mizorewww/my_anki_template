@@ -12,11 +12,18 @@
         关键修复: 直接在这里显示原始内容作为回退
         JavaScript 加载完成后会用渲染后的内容替换
     -->
-    <div id="rendered-content">{{cloze:Text}}</div>
+    <div id="rendered-content" class="rendered-content">{{cloze:Text}}</div>
+    {{#Extra}}
+    <hr class="separator">
+    <div id="rendered-extra" class="rendered-content extra-section">{{Extra}}</div>
+    {{/Extra}}
 </div>
 
 <!-- 原始内容存储 -->
 <div id="raw-content" style="display:none;">{{cloze:Text}}</div>
+{{#Extra}}
+<div id="raw-extra" style="display:none;">{{Extra}}</div>
+{{/Extra}}
 
 <script src="_marked.min.js"></script>
 <script src="_katex.min.js"></script>
@@ -33,6 +40,7 @@
             if (typeof marked !== 'undefined' && typeof katex !== 'undefined' &&
                 typeof hljs !== 'undefined' && typeof renderCloze === 'function') {
                 renderCloze('raw-content', 'rendered-content', 'back');
+                renderCloze('raw-extra', 'rendered-extra', 'back');
             } else if (retryCount < maxRetries) {
                 retryCount++;
                 setTimeout(tryRender, 20);

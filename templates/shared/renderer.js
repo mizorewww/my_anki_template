@@ -11,6 +11,11 @@ function renderCloze(rawContentId, renderedContentId, mode) {
 
     // Get raw content from hidden div to avoid template literal issues
     const rawContent = rawContentDiv.innerHTML;
+    const decodeHtml = function (value) {
+        const div = document.createElement('div');
+        div.innerHTML = value;
+        return div.textContent || div.innerText || '';
+    };
 
     // Check dependencies
     if (typeof marked === 'undefined' || typeof katex === 'undefined' || typeof hljs === 'undefined') {
@@ -31,7 +36,22 @@ function renderCloze(rawContentId, renderedContentId, mode) {
     });
 
     // =====================================================
-    // Phase 2: Protect LaTeX Formulas
+    // Phase 2: Protect Markdown Code From LaTeX Parsing
+    // =====================================================
+    const codeTokens = [];
+    tokenized = tokenized.replace(/(```[\s\S]*?```|~~~[\s\S]*?~~~)/g, function (match) {
+        const token = '%%CODE_BLOCK_' + codeTokens.length + '%%';
+        codeTokens.push(match);
+        return token;
+    });
+    tokenized = tokenized.replace(/`[^`\n]+`/g, function (match) {
+        const token = '%%CODE_INLINE_' + codeTokens.length + '%%';
+        codeTokens.push(match);
+        return token;
+    });
+
+    // =====================================================
+    // Phase 3: Protect LaTeX Formulas
     // =====================================================
     const latexTokens = [];
     // Block LaTeX $$...$$
@@ -48,17 +68,21 @@ function renderCloze(rawContentId, renderedContentId, mode) {
     });
 
     // =====================================================
-    // Phase 3: Markdown Rendering
+    // Phase 4: Restore Code, Then Render Markdown
     // =====================================================
+    tokenized = tokenized.replace(/%%CODE_(?:BLOCK|INLINE)_(\d+)%%/g, function (match, index) {
+        return codeTokens[parseInt(index)];
+    });
+
     marked.setOptions({ breaks: true, gfm: true });
     let rendered = marked.parse(tokenized);
 
     // =====================================================
-    // Phase 4: Restore LaTeX and Render
+    // Phase 5: Restore LaTeX and Render
     // =====================================================
     const renderLatex = function (match, index) {
         const item = latexTokens[parseInt(index)];
-        let formula = item.formula;
+        let formula = decodeHtml(item.formula);
         let hasActiveCloze = false;
 
         // Handle clozes inside formula
@@ -84,30 +108,22 @@ function renderCloze(rawContentId, renderedContentId, mode) {
                 const dataClozeMatch = token.match(/data-cloze="([^"]*)"/);
 
                 if (contentMatch && contentMatch[1] && contentMatch[1] !== '[...]') {
-                    content = contentMatch[1];
+                    content = decodeHtml(contentMatch[1]);
                 } else if (dataClozeMatch) {
-                    const div = document.createElement('div');
-                    div.innerHTML = dataClozeMatch[1];
-                    content = div.textContent;
+                    content = decodeHtml(dataClozeMatch[1]);
                 }
 
                 // Return pure content for LaTeX rendering (no modification of user fields)
                 return content;
             });
 
-            // Clean up braces
-            const openCount = (formula.match(/\{/g) || []).length;
-            const closeCount = (formula.match(/\}/g) || []).length;
-            if (closeCount > openCount) {
-                formula = formula.slice(0, -(closeCount - openCount));
-            }
         }
 
         try {
             const html = katex.renderToString(formula.trim(), {
                 displayMode: item.type === 'block',
                 throwOnError: false,
-                output: 'html',
+                output: 'htmlAndMathml',
                 trust: true
             });
 
@@ -132,7 +148,7 @@ function renderCloze(rawContentId, renderedContentId, mode) {
     rendered = rendered.replace(/%%LATEX_INLINE_(\d+)%%/g, renderLatex);
 
     // =====================================================
-    // Phase 5: Restore Cloze Tags (outside LaTeX)
+    // Phase 6: Restore Cloze Tags (outside LaTeX)
     // =====================================================
     rendered = rendered.replace(/%%CLOZE_(\d+)%%/g, function (match, index) {
         return clozeTokens[parseInt(index)];

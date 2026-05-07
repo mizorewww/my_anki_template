@@ -4,14 +4,21 @@
 <link id="hljs-dark" rel="stylesheet" href="_github-dark.min.css" media="(prefers-color-scheme: dark)">
 
 <div class="content-wrapper">
-    <div id="rendered-content">{{cloze:Text}}</div>
+    <div id="rendered-content" class="rendered-content">{{cloze:Text}}</div>
     <hr class="separator">
     <div class="input-area">
         {{type:cloze:Text}}
     </div>
+    {{#Extra}}
+    <hr class="separator">
+    <div id="rendered-extra" class="rendered-content extra-section">{{Extra}}</div>
+    {{/Extra}}
 </div>
 
 <div id="raw-content" style="display:none;">{{cloze:Text}}</div>
+{{#Extra}}
+<div id="raw-extra" style="display:none;">{{Extra}}</div>
+{{/Extra}}
 
 <script src="_marked.min.js"></script>
 <script src="_katex.min.js"></script>
@@ -25,6 +32,7 @@
             if (typeof marked !== 'undefined' && typeof katex !== 'undefined' &&
                 typeof hljs !== 'undefined' && typeof renderCloze === 'function') {
                 renderCloze('raw-content', 'rendered-content', 'back');
+                renderCloze('raw-extra', 'rendered-extra', 'back');
             } else if (retryCount++ < maxRetries) {
                 setTimeout(tryRender, 20);
             }

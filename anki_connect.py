@@ -2,16 +2,18 @@
 """
 Anki Connect 同步脚本
 功能：
-1. 自动拉取最新代码 (git pull)
+1. 按需拉取最新代码 (python3 anki_connect.py --pull)
 2. 创建/更新笔记类型
 3. 同步媒体文件（字体、JS/CSS 库）
 4. 创建示例卡片
 """
 
+import argparse
 import json
 import urllib.request
 import base64
 import os
+import re
 import subprocess
 from pathlib import Path
 
@@ -23,6 +25,11 @@ SCRIPT_DIR = Path(__file__).parent.resolve()
 FONTS_DIR = SCRIPT_DIR / "fonts"
 VENDOR_DIR = SCRIPT_DIR / "templates" / "vendor"
 SHARED_DIR = SCRIPT_DIR / "templates" / "shared"
+MEDIA_SETUP_HINT = (
+    "请先运行资源脚本后再同步：\n"
+    "  bash sync_font.sh\n"
+    "  bash sync_libs.sh"
+)
 
 
 # ======================= Anki Connect API =======================
@@ -77,8 +84,7 @@ def check_media_exists(filename: str) -> bool:
 def sync_media_file(filename: str, filepath: Path, timeout: int = 60, force: bool = False):
     """同步单个媒体文件到 Anki"""
     if not filepath.exists():
-        print(f"  ⚠ 跳过不存在的文件: {filepath}")
-        return False
+        raise FileNotFoundError(f"缺少必需媒体文件: {filepath}\n{MEDIA_SETUP_HINT}")
     
     # 检查文件是否已存在 (除非强制上传)
     if not force and check_media_exists(filename):
@@ -134,6 +140,28 @@ def sync_all_media(force: bool = False):
         "_github-dark.min.css",
 
     ]
+
+    katex_css_path = VENDOR_DIR / "katex.min.css"
+    if katex_css_path.exists():
+        katex_css = katex_css_path.read_text(encoding="utf-8", errors="ignore")
+        if "fonts/KaTeX_" in katex_css:
+            raise RuntimeError(
+                "katex.min.css 仍引用 fonts/KaTeX_*，Anki 媒体库无法按这个相对路径加载字体。\n"
+                f"{MEDIA_SETUP_HINT}"
+            )
+
+        referenced_katex_fonts = sorted(set(
+            re.findall(r"url\(_(KaTeX_[^)'\"]+)\)", katex_css)
+        ))
+        for font_name in referenced_katex_fonts:
+            vendor_files.append(f"_{font_name}")
+
+    # Also sync any extra KaTeX font files already downloaded by sync_libs.sh.
+    for font_path in sorted(VENDOR_DIR.glob("KaTeX_*")):
+        if font_path.is_file():
+            filename = f"_{font_path.name}"
+            if filename not in vendor_files:
+                vendor_files.append(filename)
     
     print("  JS/CSS 库:")
     for filename in vendor_files:
@@ -385,9 +413,33 @@ def create_example_cards():
 
 
 # ======================= 主程序 =======================
-def try_git_pull():
+def env_truthy(name: str) -> bool:
+    """Return True when an environment variable asks for an opt-in behavior."""
+    return os.environ.get(name, "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def parse_args(argv=None):
+    parser = argparse.ArgumentParser(description="同步 Anki 现代模板到 AnkiConnect。")
+    parser.add_argument(
+        "--pull",
+        action="store_true",
+        help="同步前执行 git pull。默认跳过，避免导入时隐式改动本地模板。",
+    )
+    parser.add_argument(
+        "--force-media",
+        action="store_true",
+        help="强制重新上传已存在的媒体文件。",
+    )
+    return parser.parse_args(argv)
+
+
+def try_git_pull(enabled: bool):
     """尝试拉取最新代码"""
     print("\n🔄 检查更新...")
+    if not enabled:
+        print("  ⏭ 已跳过 git pull（需要时使用 --pull 或设置 ANKI_TEMPLATE_GIT_PULL=1）")
+        return
+
     try:
         result = subprocess.run(
             ["git", "pull"],
@@ -412,27 +464,32 @@ def try_git_pull():
         print(f"  ⚠ 更新检查失败: {e}，继续运行...")
 
 
-def main():
+def main(argv=None):
+    args = parse_args(argv)
+
     print("=" * 50)
     print("     Anki Connect 同步工具 v1.1")
     print("=" * 50)
     
-    # 0. 尝试拉取最新代码
-    try_git_pull()
+    # 0. 按需拉取最新代码
+    try_git_pull(args.pull or env_truthy("ANKI_TEMPLATE_GIT_PULL"))
     
     # 1. 检查连接
     if not check_connection():
-        return
-    
-    # 2. 同步媒体文件
-    print("\n📦 同步媒体文件...")
-    sync_all_media()
-    
-    # 2. 配置笔记类型
-    create_or_update_models()
-    
-    # 3. 创建示例卡片
-    create_example_cards()
+        return 1
+
+    try:
+        # 2. 同步媒体文件
+        sync_all_media(force=args.force_media)
+
+        # 3. 配置笔记类型
+        create_or_update_models()
+
+        # 4. 创建示例卡片
+        create_example_cards()
+    except (FileNotFoundError, RuntimeError) as e:
+        print(f"\n✗ 同步失败:\n{e}")
+        return 1
     
     print("\n" + "=" * 50)
     print("     ✓ 同步完成！")
