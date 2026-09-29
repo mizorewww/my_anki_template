@@ -122,12 +122,12 @@
 
 /* ================== 基础样式 ================== */
 html {
-    font-size: 18px;
+    font-size: 20px;
 }
 
 .card {
     font-family: 'LXGW WenKai', 'Noto Sans SC', 'PingFang SC', sans-serif;
-    font-size: 1.1rem;
+    font-size: 1rem;
     line-height: 1.8;
     color: var(--text-primary);
     background: var(--bg-primary);
@@ -136,13 +136,16 @@ html {
     text-align: left;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
+    box-sizing: border-box;
 }
 
 /* 内容容器 */
 .content-wrapper {
-    max-width: 720px;
-    margin: 0 auto;
-    padding: 2rem 1.5rem;
+    width: 100%;
+    margin: 0;
+    padding: 2rem 1.25rem;
+    box-sizing: border-box;
 }
 
 /* ================== 填空题样式 ================== */
@@ -281,8 +284,7 @@ html {
 /* Anki 输入框 */
 #typeans {
     width: 100%;
-    max-width: 600px;
-    margin: 0 auto;
+    margin: 0;
 }
 
 input#typeans {
@@ -458,6 +460,34 @@ hr.separator {
 }
 
 /* ================== 响应式设计 ================== */
+@media (min-width: 768px) and (max-width: 1180px) {
+    html {
+        font-size: 36px;
+    }
+
+    .content-wrapper {
+        padding: 1.5rem 1.25rem;
+    }
+
+    .card {
+        line-height: 1.65;
+    }
+
+    input#typeans {
+        font-size: 1rem;
+    }
+}
+
+@media (min-width: 1181px) {
+    html {
+        font-size: 32px;
+    }
+
+    .content-wrapper {
+        padding: 1.75rem 1.5rem;
+    }
+}
+
 @media (max-width: 600px) {
     html {
         font-size: 16px;
