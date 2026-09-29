@@ -54,17 +54,26 @@ function renderCloze(rawContentId, renderedContentId, mode) {
     // Phase 3: Protect LaTeX Formulas
     // =====================================================
     const latexTokens = [];
+    const pushLatexToken = function (type, formula) {
+        const token = '%%LATEX_' + type.toUpperCase() + '_' + latexTokens.length + '%%';
+        latexTokens.push({ type: type, formula: formula });
+        return token;
+    };
+    // Block LaTeX \[...\]
+    tokenized = tokenized.replace(/\\\[([\s\S]*?)\\\]/g, function (match, formula) {
+        return pushLatexToken('block', formula);
+    });
+    // Inline LaTeX \(...\)
+    tokenized = tokenized.replace(/\\\(([\s\S]*?)\\\)/g, function (match, formula) {
+        return pushLatexToken('inline', formula);
+    });
     // Block LaTeX $$...$$
     tokenized = tokenized.replace(/\$\$([\s\S]*?)\$\$/g, function (match, formula) {
-        const token = '%%LATEX_BLOCK_' + latexTokens.length + '%%';
-        latexTokens.push({ type: 'block', formula: formula });
-        return token;
+        return pushLatexToken('block', formula);
     });
     // Inline LaTeX $...$
     tokenized = tokenized.replace(/\$([^\$\n]+?)\$/g, function (match, formula) {
-        const token = '%%LATEX_INLINE_' + latexTokens.length + '%%';
-        latexTokens.push({ type: 'inline', formula: formula });
-        return token;
+        return pushLatexToken('inline', formula);
     });
 
     // =====================================================
